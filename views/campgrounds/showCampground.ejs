@@ -1,0 +1,22 @@
+<% layout('layouts/boilerplate') %>
+<style>
+  /* img { */
+    /* margin: 0 auto; */
+    /* height: 50%; */
+    /* width: 80%; */
+  /* } */
+</style>
+<h1><%=c.name%></h1>
+<h3><%=c.location%></h3>
+<p>Price: <%=c.price.toFixed(2)%></p>
+<p><%=c.description%></p>
+<img src="<%=c.image%>" alt="">
+<p>
+<a href="/campgrounds">All Campgrounds</a>
+<p><a href='/campgrounds/edit/<%=c._id%>''>Edit</a></p>
+<form action="/campgrounds/<%=c._id%>?_method=DELETE" method="POST">
+  <button>DELETE</button>
+</form>
+
+  
+ 
