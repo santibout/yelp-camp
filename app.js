@@ -8,6 +8,8 @@ const bodyParser = require("body-parser");
 const methodOverride = require("method-override");
 const campgroundRoutes = require("./routes/campgrounds");
 const engine = require("ejs-mate");
+const Error = require("./utils/error");
+const catchAsync = require("./utils/catchAsync");
 
 mongoose
   .connect("mongodb://localhost/yelpcamp", {
@@ -31,6 +33,12 @@ app.use((req, res, next) => {
 app.use(methodOverride("_method"));
 app.use("/campgrounds", campgroundRoutes);
 
+app.get("/chicken", (req, res) => {
+  //   chicken();
+  const e = new Error("505");
+  res.send(e.type);
+});
+
 app.get("/", (req, res) => {
   const campground = new Campground({
     name: "first",
@@ -39,6 +47,15 @@ app.get("/", (req, res) => {
   });
   console.log(campground);
   res.render("home", { campground });
+});
+
+app.all("*", (req, res, next) => {
+  next(new Error("Page Not Found", 404));
+});
+
+app.use((err, req, res, next) => {
+  const { statusCode = 500, message = "Oops Something Went Wrong" } = err;
+  res.status(statusCode).render("error", { err });
 });
 
 app.listen(3000, () => console.log("YelpCamp running"));

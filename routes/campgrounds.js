@@ -1,6 +1,8 @@
 var express = require("express");
 var router = express.Router();
 const Campground = require("../models/campground");
+const Error = require("../utils/error");
+const catchAsync = require("../utils/catchAsync");
 
 router.get("/create", (req, res) => {
   res.render("campgrounds/create", { c: { name: "" } });
@@ -18,12 +20,29 @@ router.get("/edit/:id", async (req, res) => {
   res.render("campgrounds/edit", { c: campground });
 });
 
-router.post("/", async (req, res) => {
-  console.log(req.body);
-  const campground = new Campground({ ...req.body.campground });
-  await campground.save();
-  res.redirect("/campgrounds");
-});
+// router.post("/", async (req, res, next) => {
+//   try {
+//     const campground = new Campground({ ...req.body.campground });
+//     if (campground.price === "" || campground.price === null)
+//       campground.price = 0;
+//     await campground.save();
+//     res.redirect("/campgrounds");
+//   } catch (e) {
+//     next(e);
+//   }
+// });
+
+// or we could do it this way but I prefer the above method
+router.post(
+  "/",
+  catchAsync(async (req, res, next) => {
+    const campground = new Campground({ ...req.body.campground });
+    if (campground.price === "" || campground.price === null)
+      campground.price = 0;
+    await campground.save();
+    res.redirect("/campgrounds");
+  })
+);
 
 router.put("/:id", async (req, res) => {
   console.log("put route hit");
@@ -39,11 +58,11 @@ router.put("/:id", async (req, res) => {
   res.redirect("/campgrounds");
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", catchAsync(async (req, res) => {
   const { id } = req.params;
   const campground = await Campground.findById(id);
   res.render("campgrounds/showCampground", { c: campground });
-});
+}));
 
 router.delete("/:id", async (req, res) => {
   const { id } = req.params;
